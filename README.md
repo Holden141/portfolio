@@ -33,5 +33,6 @@ Interactive Power BI dashboard analyzing 16,500+ games.
 Mobile game A/B test analysis. Moving the first gate to level 40 significantly improved 7-day retention (p = 0.0016).
 
 *Key skills: Python, A/B testing, statistical analysis (Mann-Whitney, chi-square)*
+
 ---
 *Python projects contains its own README with full details, code, and screenshots.*
