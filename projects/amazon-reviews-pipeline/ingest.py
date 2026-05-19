@@ -15,6 +15,11 @@ df = df.dropna(subset=['score'])                           # Remove rows with ba
 client = bigquery.Client()
 table_id = f"{client.project}.amazon_reviews_dataset.raw_reviews"
 
-job = client.load_table_from_dataframe(df, table_id)
+job_config = bigquery.LoadJobConfig(
+    write_disposition=bigquery.WriteDisposition.WRITE_APPEND,  # WRITE_TRUNCATE to overwrite or  APPEND to append, in case of streaming more data later
+    autodetect=True  # Automatically matches schema
+)
+
+job = client.load_table_from_dataframe(df, table_id, job_config=job_config)
 job.result()
 print(f"✅ Uploaded {len(df)} rows")

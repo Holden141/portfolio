@@ -5,6 +5,7 @@ analyses/
 macros/
 tests/
 snapshots/
+seeds/
 test.ipynb
 amazon-reviews-project-496412-52494825f4f2.json
-seeds/
+Reviews.csv
