@@ -1,0 +1,9 @@
+target/
+dbt_packages/
+logs/
+analyses/
+macros/
+tests/
+snapshots/
+test.ipynb
+amazon-reviews-project-496412-52494825f4f2.json

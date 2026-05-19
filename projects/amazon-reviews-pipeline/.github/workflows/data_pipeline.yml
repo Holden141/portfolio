@@ -1,0 +1,45 @@
+name: Daily Data Pipeline
+
+on:
+  schedule:
+    - cron: '0 3 * * *'      # Runs at 3 AM UTC daily
+  workflow_dispatch:          # Allows manual trigger
+
+jobs:
+  run-pipeline:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Install dependencies
+        run: |
+          pip install pandas google-cloud-bigquery dbt-bigquery
+      
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+      
+      - name: Set Google Cloud project
+        run: |
+          echo "GOOGLE_CLOUD_PROJECT=${{ secrets.GCP_PROJECT_ID }}" >> $GITHUB_ENV
+      
+      - name: Run ingestion
+        run: python ingest.py
+      
+      - name: Run dbt transformations
+        run: |
+          cd review_pipeline
+          dbt run
+      
+      - name: Run dbt tests
+        run: |
+          cd review_pipeline
+          dbt test

@@ -1,0 +1,40 @@
+version: 2
+
+sources:
+  - name: "amazon_reviews"
+    schema: "amazon_reviews_dataset"
+    tables:
+      - name: "raw_reviews"
+
+models:
+  - name: stg_reviews
+    description: " Amazon product reviews with sentiment classification"
+    columns:
+      - name: id
+        tests:
+          - unique
+          - not_null
+      
+      - name: productid
+        tests:
+          - not_null
+      
+      - name: userid
+        tests:
+          - not_null
+      
+      - name: score
+        tests:
+          - not_null
+          - accepted_values:
+              values: [1, 2, 3, 4, 5]
+      
+      - name: rating_sentiment
+        description: "Derived sentiment from score (POSITIVE, NEUTRAL, NEGATIVE)"
+        tests:
+          - accepted_values:
+              values: ['POSITIVE', 'NEUTRAL', 'NEGATIVE']
+      
+      - name: text
+        tests:
+          - not_null

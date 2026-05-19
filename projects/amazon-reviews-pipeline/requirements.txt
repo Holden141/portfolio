@@ -1,0 +1,3 @@
+dbt-bigquery
+pyarrow
+google-cloud-bigquery
