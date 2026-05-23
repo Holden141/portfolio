@@ -18,16 +18,24 @@ def save_state(last_row):
     with open(STATE_FILE, 'w') as f:
         json.dump({"last_row": last_row, "last_run": datetime.now().isoformat()}, f, indent=2)
 
-# Main
+# Initialize BigQuery client
+client = bigquery.Client()
 start_row = load_state()
 print(f"Starting from row {start_row}")
 
-# Read 100 rows
-df = pd.read_csv('Reviews.csv', skiprows=range(1, start_row + 1), nrows=100)
+# Query the next 100 rows from the Reviews table in BigQuery
+query = f"""
+SELECT *
+FROM `{client.project}.amazon_reviews_dataset.Reviews`
+ORDER BY Id
+LIMIT 100 OFFSET {start_row}
+"""
+df = client.query(query).to_dataframe()
 
 if len(df) == 0:
     print("No new rows.")
     exit(0)
+
 
 
 #---------------------------------Cast properly -----------------------------------------
@@ -38,7 +46,6 @@ df = df.dropna(subset=['score'])                           # Remove rows with ba
 #----------------------------------------------------------------------------------------
 
 #------------Upload---------------
-client = bigquery.Client()
 table_id = f"{client.project}.amazon_reviews_dataset.raw_reviews"
 
 job_config = bigquery.LoadJobConfig(
