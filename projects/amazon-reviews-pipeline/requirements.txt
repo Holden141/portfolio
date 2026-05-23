@@ -1,3 +1,5 @@
 dbt-bigquery
 pyarrow
 google-cloud-bigquery
+dotenv
+openai
