@@ -1,17 +1,15 @@
-name: Daily Data Pipeline
+name: Daily Pipeline
 
 on:
   schedule:
-    - cron: '0 3 * * *'      # Runs at 3 AM UTC daily
-  workflow_dispatch:          # Allows manual trigger
+    - cron: '0 3 * * *'  # 3 AM daily
+  workflow_dispatch:      # Manual trigger
 
 jobs:
   run-pipeline:
     runs-on: ubuntu-latest
-    
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
       
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -19,27 +17,25 @@ jobs:
           python-version: '3.11'
       
       - name: Install dependencies
-        run: |
-          pip install pandas google-cloud-bigquery dbt-bigquery
+        run: pip install pandas google-cloud-bigquery dbt-bigquery openai python-dotenv sentence-transformers umap-learn hdbscan
       
-      - name: Authenticate to Google Cloud
+      - name: Authenticate to GCP
         uses: google-github-actions/auth@v2
         with:
           credentials_json: ${{ secrets.GCP_SA_KEY }}
       
-      - name: Set Google Cloud project
-        run: |
-          echo "GOOGLE_CLOUD_PROJECT=${{ secrets.GCP_PROJECT_ID }}" >> $GITHUB_ENV
-      
-      - name: Run ingestion
+      - name: Run ingest
         run: python ingest.py
       
-      - name: Run dbt transformations
-        run: |
-          cd review_pipeline
-          dbt run
+      - name: Run dbt
+        run: cd review_pipeline && dbt run
       
-      - name: Run dbt tests
-        run: |
-          cd review_pipeline
-          dbt test
+      - name: Run classification (new negatives only)
+        env:
+         DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+        run: python 01_classify_reviews.py
+    
+      - name: Run clustering (daily, remember to consolidate)
+        env:
+         DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+        run: python 02_cluster_analysis.py

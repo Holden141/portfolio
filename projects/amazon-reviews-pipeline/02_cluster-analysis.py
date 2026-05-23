@@ -1,60 +1,33 @@
 import os
-from dotenv import load_dotenv
-from openai import OpenAI
-from google.cloud import bigquery
 import pandas as pd
-
 from sentence_transformers import SentenceTransformer
 import umap
 import hdbscan
+from dotenv import load_dotenv
+from openai import OpenAI
+from google.cloud import bigquery
 
 load_dotenv()
-
-#initialise clients
+#initialise client
 client = OpenAI(
     api_key=os.getenv("DEEPSEEK_API_KEY"),
     base_url="https://api.deepseek.com"
 )
 bq = bigquery.Client()
 
-# Query negative reviews
+#--------------------- Read from BigQuery ---------------------
 query = """
-SELECT id, text, productid, score
-FROM `amazon_reviews_dataset.stg_reviews`
-WHERE rating_sentiment = 'NEGATIVE'
-LIMIT 200
+SELECT review_id, review_text, root_cause
+FROM `amazon_reviews_dataset.reviews_with_root_causes`
 """
 df = bq.query(query).to_dataframe()
-print(f"Got {len(df)} reviews")
+print(f"Loaded {len(df)} rows from reviews_with_root_causes")
 
-# Identify root causes for each row
-results = []
-for i, row in df.iterrows():
-    print(f"Processing {i+1}/{len(df)}")
-    prompt = f"""Summarize the MAIN root cause of this negative review in ONE brief sentence (5-10 words).
-    Review: "{row['text']}"
-    Return ONLY the sentence. Nothing else.""" 
-    
-    response = client.chat.completions.create(
-        model="deepseek-v4-flash",
-        messages=[{"role": "user", "content": prompt}]
-    )
-    results.append({
-        "review_id": row["id"],
-        "review_text": row["text"],
-        "root_cause": response.choices[0].message.content.strip()
-    })
-
-# Save to CSV
-output_df = pd.DataFrame(results)
-print("Root Causes Identified")
-
-phrases = output_df["root_cause"].astype(str).tolist()
+phrases = df["root_cause"].astype(str).tolist()
 
 #-----------------------Generate EMBEDDINGS----------------------------------------
 model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2") 
 embeddings = model.encode(phrases, show_progress_bar=True)
-print(f"Embeddings shape: {embeddings.shape}")
 
 #----------------------Clustering-----------------------------------------------
 umap_reducer = umap.UMAP(n_components=5, random_state=42, n_neighbors=15, min_dist=0.0)
@@ -101,9 +74,16 @@ cluster_names = {int(k): v for k, v in cluster_names.items()}
 cluster_names[-1] = "Other"
 df_clusters['cluster_name'] = df_clusters['cluster_id'].map(cluster_names)
 
-output_df['cluster_id'] = df_clusters['cluster_id']
-output_df['cluster_name'] = df_clusters['cluster_name']
 
-#---------- Save to csv.
-output_df.to_csv("reviews_with_clusters.csv", index=False)
-print('reviews_with_clusters.csv Written.')
+#----------- Upload to BQ0--------------
+table_id = f"{bq.project}.amazon_reviews_dataset.reviews_with_clusters"
+job = bq.load_table_from_dataframe(
+    df_clusters,
+    table_id,
+    job_config=bigquery.LoadJobConfig(
+        write_disposition=bigquery.WriteDisposition.WRITE_TRUNCATE,  # Overwrite entire table
+        autodetect=True
+    )
+)
+job.result()
+print(f"✅ Wrote {len(df_clusters)} rows to {table_id}")

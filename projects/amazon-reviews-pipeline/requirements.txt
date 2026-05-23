@@ -3,3 +3,6 @@ pyarrow
 google-cloud-bigquery
 dotenv
 openai
+sentence-transformers
+umap-learn
+hdbscan
