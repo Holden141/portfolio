@@ -1,0 +1,10 @@
+review_pipeline:
+  target: dev
+  outputs:
+    dev:
+      type: bigquery
+      method: oauth
+      project: amazon-reviews-project-496412
+      dataset: amazon_reviews_dataset
+      location: US
+      threads: 4
