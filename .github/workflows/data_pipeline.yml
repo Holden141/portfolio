@@ -28,7 +28,7 @@ jobs:
         run: python projects/amazon-reviews-pipeline/ingest.py
       
       - name: Run dbt
-        run: cd projects/amazon-reviews-pipeline/review_pipeline && dbt run
+        run: cd projects/amazon-reviews-pipeline/review_pipeline && dbt run --profiles-dir .
       
       - name: Run classification
         env:
