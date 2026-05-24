@@ -39,3 +39,8 @@ jobs:
         env:
           DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
         run: python projects/amazon-reviews-pipeline/02_cluster_analysis.py
+
+      - name: Run anomaly detection 
+        env: 
+          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }} 
+        run: python projects/amazon-reviews-pipeline/03_anomaly_detection.py

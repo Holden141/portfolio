@@ -6,3 +6,5 @@ openai
 sentence-transformers
 umap-learn
 hdbscan
+numpy
+scikit-learn
