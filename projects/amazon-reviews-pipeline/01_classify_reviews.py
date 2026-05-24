@@ -14,7 +14,7 @@ bq = bigquery.Client()
 
 # Query negative reviews
 query = """
-SELECT id, text, productid, score, helpfulness_numerator, helpfulness_denominator
+SELECT id, text, productid, score, helpfulnessnumerator, helpfulnessdenominator
 FROM `amazon_reviews_dataset.stg_reviews`
 WHERE rating_sentiment = 'NEGATIVE'
 LIMIT 200
@@ -43,8 +43,8 @@ for i, row in df.iterrows():
         "review_text": row["text"],
         "root_cause": response.choices[0].message.content.strip(),
         "score": row["score"],
-        "helpfulness_numerator": row["helpfulness_numerator"],
-        "helpfulness_denominator": row["helpfulness_denominator"]
+        "helpfulness_numerator": row["helpfulnessnumerator"],
+        "helpfulness_denominator": row["helpfulnessdenominator"]
     })
 
 output_df = pd.DataFrame(results)
