@@ -30,7 +30,7 @@ query = f"""
 SELECT *
 FROM `{client.project}.amazon_reviews_dataset.Reviews`
 ORDER BY Id
-LIMIT 1000 OFFSET {start_row}
+LIMIT 500 OFFSET {start_row}
 """
 df = client.query(query).to_dataframe()
 
