@@ -21,6 +21,12 @@ SELECT review_id, review_text, root_cause
 FROM `amazon_reviews_dataset.reviews_with_root_causes`
 """
 df = bq.query(query).to_dataframe()
+
+MIN_ROWS = 30
+if len(df) < MIN_ROWS:
+    print(f"Not enough data for clustering. Have {len(df)} rows, need {MIN_ROWS}.")
+    exit(0)
+
 print(f"Loaded {len(df)} rows from reviews_with_root_causes")
 
 phrases = df["root_cause"].astype(str).tolist()

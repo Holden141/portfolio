@@ -1,25 +1,27 @@
 from google.cloud import bigquery
 import pandas as pd
-import os
-import json
 from datetime import datetime
 
-
-#----State file---------------------
-STATE_FILE = "state.json"
+client = bigquery.Client()
 
 def load_state():
-    if os.path.exists(STATE_FILE):
-        with open(STATE_FILE, 'r') as f:
-            return json.load(f).get("last_row", 0)
-    return 0
+    query = """
+    SELECT last_row FROM `amazon_reviews_dataset.pipeline_state`
+    WHERE pipeline_name = 'ingest'
+    """
+    result = client.query(query).to_dataframe()
+    return result['last_row'].iloc[0] if not result.empty else 0
 
 def save_state(last_row):
-    with open(STATE_FILE, 'w') as f:
-        json.dump({"last_row": last_row, "last_run": datetime.now().isoformat()}, f, indent=2)
+    query = f"""
+    MERGE `amazon_reviews_dataset.pipeline_state` AS target
+    USING (SELECT 'ingest' as pipeline_name, {last_row} as last_row, CURRENT_TIMESTAMP() as last_run) AS source
+    ON target.pipeline_name = source.pipeline_name
+    WHEN MATCHED THEN UPDATE SET last_row = source.last_row, last_run = source.last_run
+    WHEN NOT MATCHED THEN INSERT (pipeline_name, last_row, last_run) VALUES (source.pipeline_name, source.last_row, source.last_run)
+    """
+    client.query(query).result()
 
-# Initialize BigQuery client
-client = bigquery.Client()
 start_row = load_state()
 print(f"Starting from row {start_row}")
 
@@ -35,8 +37,6 @@ df = client.query(query).to_dataframe()
 if len(df) == 0:
     print("No new rows.")
     exit(0)
-
-
 
 #---------------------------------Cast properly -----------------------------------------
 df.columns = df.columns.str.lower()

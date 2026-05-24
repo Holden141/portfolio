@@ -22,6 +22,10 @@ LIMIT 200
 df = bq.query(query).to_dataframe()
 print(f"Got {len(df)} reviews")
 
+if df.empty:
+    print("No new negative reviews to classify.")
+    exit(0)
+    
 # Identify root causes for each row
 results = []
 for i, row in df.iterrows():
