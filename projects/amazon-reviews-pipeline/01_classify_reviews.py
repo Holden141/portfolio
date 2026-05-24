@@ -14,7 +14,7 @@ bq = bigquery.Client()
 
 # Query negative reviews
 query = """
-SELECT id, text, productid, score
+SELECT id, text, productid, score, helpfulness_numerator, helpfulness_denominator
 FROM `amazon_reviews_dataset.stg_reviews`
 WHERE rating_sentiment = 'NEGATIVE'
 LIMIT 200
@@ -25,7 +25,7 @@ print(f"Got {len(df)} reviews")
 if df.empty:
     print("No new negative reviews to classify.")
     exit(0)
-    
+
 # Identify root causes for each row
 results = []
 for i, row in df.iterrows():
@@ -41,7 +41,10 @@ for i, row in df.iterrows():
     results.append({
         "review_id": row["id"],
         "review_text": row["text"],
-        "root_cause": response.choices[0].message.content.strip()
+        "root_cause": response.choices[0].message.content.strip(),
+        "score": row["score"],
+        "helpfulness_numerator": row["helpfulness_numerator"],
+        "helpfulness_denominator": row["helpfulness_denominator"]
     })
 
 output_df = pd.DataFrame(results)
