@@ -4,9 +4,11 @@ Data science &amp; analytics projects.
 ## Projects
 
 ### [Amazon Reviews Pipeline](./projects/amazon-reviews-pipeline/)
-End-to-end data pipeline: daily ingestion → dbt transformation → LLM root cause analysis → clustering → anomaly detection. Processes Amazon product reviews across multiple categories (food, electronics, pet supplies).
+**💬 Live Demo:** [https://amazon-complaints-assistant.streamlit.app/](https://amazon-complaints-assistant.streamlit.app/)
 
-*Key skills: BigQuery, dbt, Python, LLM (DeepSeek), clustering (HDBSCAN), anomaly detection (Isolation Forest), GitHub Actions, Looker Studio*
+End-to-end data pipeline: daily ingestion → dbt transformation → LLM root cause analysis → clustering → anomaly detection → RAG chatbot. Processes Amazon product reviews across multiple categories (food, electronics, pet supplies).
+
+*Key skills: BigQuery, dbt, Python, LLM (DeepSeek), clustering (HDBSCAN), anomaly detection (Isolation Forest), GitHub Actions, Looker Studio, RAG, Streamlit, Pinecone*
 
 ![Looker Dashboard](./projects/amazon-reviews-pipeline/report.png)
 ---
