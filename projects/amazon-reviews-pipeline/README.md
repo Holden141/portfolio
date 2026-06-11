@@ -1,10 +1,15 @@
 # Amazon Reviews Pipeline
 
 > ✅ Core pipeline complete — daily incremental ingestion, transformation, testing, LLM classification, clustering, and anomaly detection.
+> ✅ Deployed Chatbot
+> 🔨 WIP: Airflow migration
 
 Automated data pipeline that ingests Amazon product reviews, transforms them with dbt, and prepares them for analysis. Built as a portfolio project to demonstrate data engineering and analytics skills.
-**Original Dataset**: https://www.kaggle.com/datasets/arhamrumi/amazon-product-reviews .
+## 💬 Live Demo
 
+**Try the chatbot here:** [https://amazon-complaints-assistant.streamlit.app/](https://amazon-complaints-assistant.streamlit.app/)
+
+Ask questions about 1,545 negative Amazon reviews. The app uses Pinecone for vector search and DeepSeek to generate answers.
 ## 🎯 What It Does
 
 | Stage | Description | Output |
@@ -14,6 +19,7 @@ Automated data pipeline that ingests Amazon product reviews, transforms them wit
 | **LLM Root Cause** | DeepSeek extracts root cause from each negative review | `reviews_with_root_causes` |
 | **Clustering** | Sentence embeddings + HDBSCAN groups similar complaints | `reviews_with_clusters` |
 | **Anomaly Detection** | Isolation Forest flags suspicious reviews | `anomalous_reviews` |
+| **Chatbot** | Convert csv to RAG. Query over Deepseek. Deployed on Streamlit. | https://amazon-complaints-assistant.streamlit.app/|
 
 
 ## 🛠️ Tech Stack
@@ -23,11 +29,12 @@ Automated data pipeline that ingests Amazon product reviews, transforms them wit
 | Data Warehouse | Google BigQuery |
 | Transformation | dbt (SQL models) |
 | LLM | DeepSeek API |
-| Embeddings | sentence-transformers (all-MiniLM-L6-v2) |
+| Embeddings | sentence-transformers all-MiniLM-L6-v2 (local)/llama-text-embed-v2 (pinecone)|
 | Clustering | UMAP + HDBSCAN |
 | Anomaly Detection | Isolation Forest (scikit-learn) |
 | Orchestration | GitHub Actions (daily schedule) |
 | Visualization | Looker Studio |
+| RAG Chatbot | Streamlit, Pinecone, Deepseek |
 
 ## 📊 Pipeline Architecture
 
@@ -55,3 +62,5 @@ graph TD
 ![Looker Dashboard showing sentiment distribution, star rating breakdown, complaint clusters, and anomalous reviews](report.png)
 
 > *Dashboard shows: customer sentiment (76% positive), star rating distribution, top complaint clusters from 345 negative reviews, and 15 flagged anomalies.*
+
+Original Dataset: https://www.kaggle.com/datasets/arhamrumi/amazon-product-reviews 
