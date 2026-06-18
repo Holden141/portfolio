@@ -8,3 +8,5 @@ umap-learn
 hdbscan
 numpy
 scikit-learn
+pinecone
+streamlit
