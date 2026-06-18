@@ -2,7 +2,7 @@ version: 2
 
 sources:
   - name: "amazon_reviews"
-    schema: "amazon_reviews_dataset"
+    schema: "amazon_reviews_airflow"
     tables:
       - name: "raw_reviews"
 

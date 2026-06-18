@@ -8,3 +8,15 @@ review_pipeline:
       dataset: amazon_reviews_dataset
       location: US
       threads: 4
+
+
+review_pipeline_airflow:
+  outputs:
+    dev:
+      type: bigquery
+      method: oauth
+      project: amazon-reviews-project-496412
+      dataset: amazon_reviews_airflow
+      location: US
+      threads: 4
+  target: dev
