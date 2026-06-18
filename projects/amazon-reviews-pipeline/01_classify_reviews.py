@@ -1,6 +1,6 @@
 from dotenv import load_dotenv
-from openai import OpenAI
 load_dotenv()
+from openai import OpenAI
 from google.cloud import bigquery
 import pandas as pd
 import os
@@ -10,12 +10,13 @@ client = OpenAI(
     api_key=os.getenv("DEEPSEEK_API_KEY"),
     base_url="https://api.deepseek.com"
 )
-bq = bigquery.Client()
+bq = bigquery.Client(project="amazon-reviews-project-496412")
 
-# Query negative reviews
-query = """
+DATASET = "amazon_reviews_airflow"
+# Query negative reviews  -     amazon_reviews_dataset /  amazon_reviews_airflow 
+query = f"""
 SELECT id, text, productid, score, helpfulnessnumerator, helpfulnessdenominator
-FROM `amazon_reviews_dataset.stg_reviews`
+FROM `{bq.project}.{DATASET}.stg_reviews` 
 WHERE rating_sentiment = 'NEGATIVE'
 LIMIT 200
 """
@@ -51,7 +52,7 @@ output_df = pd.DataFrame(results)
 
 
 # Append to BigQuery
-table_id = f"{bq.project}.amazon_reviews_dataset.reviews_with_root_causes"
+table_id = f"{bq.project}.{DATASET}.reviews_with_root_causes"
 job = bq.load_table_from_dataframe(output_df, table_id, job_config=bigquery.LoadJobConfig(
     write_disposition=bigquery.WriteDisposition.WRITE_APPEND,
     autodetect=True
