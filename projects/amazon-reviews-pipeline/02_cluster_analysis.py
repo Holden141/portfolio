@@ -8,17 +8,19 @@ from openai import OpenAI
 from google.cloud import bigquery
 
 load_dotenv()
+
+bq = bigquery.Client(project="amazon-reviews-project-496412")
 #initialise client
 client = OpenAI(
     api_key=os.getenv("DEEPSEEK_API_KEY"),
     base_url="https://api.deepseek.com"
 )
-bq = bigquery.Client()
+DATASET = "amazon_reviews_airflow"
 
 #--------------------- Read from BigQuery ---------------------
-query = """
+query = f"""
 SELECT review_id, review_text, root_cause
-FROM `amazon_reviews_dataset.reviews_with_root_causes`
+FROM `{bq.project}.{DATASET}.reviews_with_root_causes`
 """
 df = bq.query(query).to_dataframe()
 
@@ -82,7 +84,7 @@ df_clusters['cluster_name'] = df_clusters['cluster_id'].map(cluster_names)
 
 
 #----------- Upload to BQ0--------------
-table_id = f"{bq.project}.amazon_reviews_dataset.reviews_with_clusters"
+table_id = f"{bq.project}.{DATASET}.reviews_with_clusters"
 job = bq.load_table_from_dataframe(
     df_clusters,
     table_id,
