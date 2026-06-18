@@ -1,8 +1,9 @@
 # Amazon Reviews Pipeline
 
 > ✅ Core pipeline complete — daily incremental ingestion, transformation, testing, LLM classification, clustering, and anomaly detection.
-> ✅ Deployed Chatbot
-> 🔨 WIP: Airflow migration
+> ✅ Deployed Chatbot 
+> ✅ Airflow migration
+> 🔨 WIP: Database Normalisation
 
 Automated data pipeline that ingests Amazon product reviews, transforms them with dbt, and prepares them for analysis. Built as a portfolio project to demonstrate data engineering and analytics skills.
 ## 💬 Live Demo
@@ -20,6 +21,7 @@ Ask questions about 1,545 negative Amazon reviews. The app uses Pinecone for vec
 | **Clustering** | Sentence embeddings + HDBSCAN groups similar complaints | `reviews_with_clusters` |
 | **Anomaly Detection** | Isolation Forest flags suspicious reviews | `anomalous_reviews` |
 | **Chatbot** | Convert csv to RAG. Query over Deepseek. Deployed on Streamlit. | https://amazon-complaints-assistant.streamlit.app/|
+| **Airflow**  | Pipeline now managed by Airflow | Runs in Docker|
 
 
 ## 🛠️ Tech Stack
@@ -32,9 +34,10 @@ Ask questions about 1,545 negative Amazon reviews. The app uses Pinecone for vec
 | Embeddings | sentence-transformers all-MiniLM-L6-v2 (local)/llama-text-embed-v2 (pinecone)|
 | Clustering | UMAP + HDBSCAN |
 | Anomaly Detection | Isolation Forest (scikit-learn) |
-| Orchestration | GitHub Actions (daily schedule) |
+| Orchestration | ~~GitHub Actions (daily schedule)~~ Now Airflow |
 | Visualization | Looker Studio |
 | RAG Chatbot | Streamlit, Pinecone, Deepseek |
+| 
 
 ## 📊 Pipeline Architecture
 
