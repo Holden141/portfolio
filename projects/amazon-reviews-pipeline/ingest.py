@@ -1,12 +1,14 @@
 from google.cloud import bigquery
 import pandas as pd
-from datetime import datetime
+from datetime import datetime, timezone
 
-client = bigquery.Client()
+client = bigquery.Client(project="amazon-reviews-project-496412")
+DATASET = "amazon_reviews_airflow"
+SOURCE_DATASET = "amazon_reviews_dataset" 
 
 def load_state():
-    query = """
-    SELECT last_row FROM `amazon_reviews_dataset.pipeline_state`
+    query = f"""
+    SELECT last_row FROM `{client.project}.{DATASET}.pipeline_state`
     WHERE pipeline_name = 'ingest'
     """
     result = client.query(query).to_dataframe()
@@ -14,7 +16,7 @@ def load_state():
 
 def save_state(last_row):
     query = f"""
-    MERGE `amazon_reviews_dataset.pipeline_state` AS target
+    MERGE `{client.project}.{DATASET}.pipeline_state` AS target
     USING (SELECT 'ingest' as pipeline_name, {last_row} as last_row, CURRENT_TIMESTAMP() as last_run) AS source
     ON target.pipeline_name = source.pipeline_name
     WHEN MATCHED THEN UPDATE SET last_row = source.last_row, last_run = source.last_run
@@ -28,12 +30,12 @@ print(f"Starting from row {start_row}")
 # Query the next 100 rows from the Reviews table in BigQuery
 query = f"""
 SELECT *
-FROM `{client.project}.amazon_reviews_dataset.Reviews`
+FROM `{client.project}.{SOURCE_DATASET}.Reviews`
 ORDER BY Id
 LIMIT 500 OFFSET {start_row}
 """
 df = client.query(query).to_dataframe()
-
+df['loaded_at'] = datetime.now(timezone.utc)
 if len(df) == 0:
     print("No new rows.")
     exit(0)
@@ -46,7 +48,7 @@ df = df.dropna(subset=['score'])                           # Remove rows with ba
 #----------------------------------------------------------------------------------------
 
 #------------Upload---------------
-table_id = f"{client.project}.amazon_reviews_dataset.raw_reviews"
+table_id = f"{client.project}.{DATASET}.raw_reviews"
 
 job_config = bigquery.LoadJobConfig(
     write_disposition=bigquery.WriteDisposition.WRITE_APPEND,  # WRITE_TRUNCATE to overwrite or APPEND
