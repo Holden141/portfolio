@@ -4,12 +4,12 @@ from sentence_transformers import SentenceTransformer
 from sklearn.ensemble import IsolationForest
 from google.cloud import bigquery
 
-bq = bigquery.Client()
-
+bq = bigquery.Client(project="amazon-reviews-project-496412")
+DATASET = "amazon_reviews_airflow"
 # Load reviews with root causes
-query = """
+query = f"""
 SELECT review_text, root_cause, score, helpfulness_numerator, helpfulness_denominator
-FROM `amazon_reviews_dataset.reviews_with_root_causes`
+FROM `{bq.project}.{DATASET}.reviews_with_root_causes`
 """
 df = bq.query(query).to_dataframe()
 
@@ -35,7 +35,7 @@ iso_forest = IsolationForest(contamination=0.1, random_state=42)
 df['is_anomaly'] = iso_forest.fit_predict(features) == -1
 
 # Write results to BigQuery
-table_id = f"{bq.project}.amazon_reviews_dataset.anomalous_reviews"
+table_id = f"{bq.project}.{DATASET}.anomalous_reviews"
 job = bq.load_table_from_dataframe(
     df[df['is_anomaly']],
     table_id,
